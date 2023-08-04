@@ -1,27 +1,18 @@
-const { fetchMyIP } = require("./iss");
+const { nextISSTimesForMyLocation } = require("./iss");
 
-fetchMyIP((error, ip) => {
-  if (error) {
-    console.log("It didn't work!", error);
-    return;
+const printPassTimes = function (passTimes) {
+  for (const pass of passTimes) {
+    const datetime = new Date(0);
+    datetime.setUTCSeconds(pass.risetime);
+    const duration = pass.duration;
+    console.log(`Next pass at ${datetime} for ${duration} seconds!`);
   }
-
-  console.log("It worked! Returned IP:", ip);
-});
-
-const fetchMyIP = function (callback) {
-  request("https://api.ipify.org?format=json", (error, response, body) => {
-    if (error) return callback(error, null);
-
-    if (response.statusCode !== 200) {
-      callback(
-        Error(`Status Code ${response.statusCode} when fetching IP: ${body}`),
-        null
-      );
-      return;
-    }
-
-    const ip = JSON.parse(body).ip;
-    callback(null, ip);
-  });
 };
+
+nextISSTimesForMyLocation((error, passTimes) => {
+  if (error) {
+    return console.log("It didn't work!", error);
+  }
+  // success, print out the deets!
+  printPassTimes(passTimes);
+});
